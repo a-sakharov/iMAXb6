@@ -10,6 +10,7 @@
 #endif
 
 #include "iMAXb6.h"
+#include <string.h>
 #include <hidapi.h>
 
 
@@ -17,10 +18,13 @@
 #define IMAXB6_PID (0x0001)           //yes, this is iMAX b6 vid&pid
 
 
-#define CMD_GET_PROCESS_DATA (0x55) // 85
-#define CMD_GET_DEVICE_DATA  (0x57) // 87
-#define CMD_GET_CHARGE_DATA  (0x5A) // 90
-#define CMD_UPDATE_FIRMWARE  (0x88) // 136
+#define CMD_GET_PROCESS_DATA  (0x55) // 85
+#define CMD_GET_DEVICE_DATA   (0x57) // 87
+#define CMD_GET_CHARGE_DATA   (0x5A) // 90
+#define CMD_UND_CHARGE_DATA   (0x5F) // 95
+#define CMD_UND_STOP          (0xFE) // 254
+#define CMD_START_WITH_PARAMS (0x05) // 5
+#define CMD_UPDATE_FIRMWARE   (0x88) // 136
 
 
 int iMAXb6CheckSum(uint8_t bytesCount, uint8_t *data, uint8_t startFrom);

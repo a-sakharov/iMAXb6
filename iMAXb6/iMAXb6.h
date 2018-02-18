@@ -14,6 +14,8 @@ IMAXB6_FUNC int iMAXb6Cleanup();
 IMAXB6_FUNC int iMAXb6GetState(struct ChargeInfo *chargeState);
 IMAXB6_FUNC int iMAXb6GetDeviceData(struct DeviceInfo *devInfo);
 IMAXB6_FUNC int iMAXb6GetChargeData(struct Chargedata *chargeData);
+IMAXB6_FUNC int iMAXb6GetSomeChargeData(struct SomeChargeData *someChargeData);
+IMAXB6_FUNC int iMAXbStartProcess(struct ProcessParams *processParams);
 
 struct ChargeInfo
 {
@@ -68,5 +70,29 @@ struct Chargedata
     uint16_t CELL4;          //?
     uint16_t CELL5;          //?
     uint16_t CELL6;          //?
+};
+
+struct SomeChargeData
+{
+    float a;
+    float b;
+    uint8_t c;
+};
+
+struct ProcessParams
+{
+    uint8_t  BattType;       //hi-group of battery types?
+    uint8_t  Cell;           //Cell count?
+    uint8_t  LiPwmMode;      //low group of bat types?
+    uint8_t  NiPwmMode;      //low group of bat types?
+    uint8_t  PbPwmMode;      //low group of bat types?
+    uint16_t CCurrent;       //charge current in mA?
+    uint16_t DCurrent;       //discharge current in mA?
+    uint16_t CellVoltage;    //min cell voltage?
+    uint16_t EndVoltage;     //max cell voltage?
+    uint8_t  R_PeakCount;    //?
+    uint8_t  CycleType;      //?
+    uint8_t  Cyc_count;      //?
+    uint16_t Trickle;        //?
 };
 #endif

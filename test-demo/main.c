@@ -11,6 +11,8 @@ int main(int argc, char **argv)
     struct ChargeInfo state;
     struct Chargedata cdata;
     struct DeviceInfo dinfo;
+    struct SomeChargeData scinfo;
+    struct ProcessParams pparams;
 
     atexit(onexitfn);
 
@@ -147,6 +149,51 @@ int main(int argc, char **argv)
         dinfo.checksum,
         dinfo.machine_id
     );
+
+    printf("\n\n");
+
+    if (iMAXb6GetSomeChargeData(&scinfo) == -1)
+    {
+#ifdef _DEBUG
+        printf("iMAXb6GetChargeData error\n");
+#endif
+        return -1;
+    }
+        
+    printf(
+        "a        " "%g"   " ?"   "\n"
+        "b        " "%g"   " ?"   "\n"
+        "c        " "%hhu" " ?"   "\n"
+        ,
+        scinfo.a,
+        scinfo.b,
+        scinfo.c
+    );
+
+
+    printf("\n\n");
+
+    pparams.BattType = 1;
+    pparams.Cell = 1;
+    pparams.LiPwmMode = 0;
+    pparams.NiPwmMode = 0;
+    pparams.PbPwmMode = 0;
+    pparams.CCurrent = 100;
+    pparams.DCurrent = 100;
+    pparams.CellVoltage = 3100;
+    pparams.EndVoltage = 4100;
+    pparams.R_PeakCount = 1;
+    pparams.CycleType = 1;
+    pparams.Cyc_count = 1;
+    pparams.Trickle = 0;
+
+    if (iMAXbStartProcess(&pparams) == -1)
+    {
+#ifdef _DEBUG
+        printf("iMAXbStartProcess error\n");
+#endif
+        return -1;
+    }
     
     if (iMAXb6Cleanup() == -1)
     {
