@@ -467,6 +467,51 @@ int iMAXbStartProcess(struct ProcessParams *processParams)
     return count;
 }
 
+int iMAXbStopProcess()
+{
+    uint8_t buffer[128];
+    uint8_t *dataPntr = buffer + 4;
+    int count;
+
+    if (iMAXb6SendPacket(CMD_STOP, NULL, 0) == -1)
+    {
+#ifdef _DEBUG
+        printf("iMAXb6SendPacket error\n");
+#endif
+        return -1;
+    }
+
+    count = hid_read_timeout(iMAXb6Device, buffer, sizeof(buffer), 100);
+    if ((count == -1) || (count == 0))
+    {
+#ifdef _DEBUG
+        printf("hid_read_timeout error\n");
+#endif
+        return -1;
+    }
+
+#ifdef _DEBUG
+#if 0
+    PrindBinaryData(count, buffer);
+    FILE *testfile = fopen("D:\\tempdump.bin", "wb");
+    if (testfile)
+    {
+        fwrite(buffer, 1, count, testfile);
+        fclose(testfile);
+    }
+#endif
+#endif
+
+    if (!iMAXb6CheckAck(buffer))
+    {
+#ifdef _DEBUG
+        printf("iMAXb6CheckAck error\n");
+#endif
+        return -1;
+    }
+
+    return count;
+}
 int iMAXb6CheckAck(uint8_t *data)
 {
     if ((data[0] == 0xF0) && (data[1] == 0xFF) && (data[2] == 0xFF))

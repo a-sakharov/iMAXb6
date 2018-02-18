@@ -16,6 +16,7 @@ IMAXB6_FUNC int iMAXb6GetDeviceData(struct DeviceInfo *devInfo);
 IMAXB6_FUNC int iMAXb6GetChargeData(struct Chargedata *chargeData);
 IMAXB6_FUNC int iMAXb6GetSomeChargeData(struct SomeChargeData *someChargeData);
 IMAXB6_FUNC int iMAXbStartProcess(struct ProcessParams *processParams);
+IMAXB6_FUNC int iMAXbStopProcess();
 
 struct ChargeInfo
 {

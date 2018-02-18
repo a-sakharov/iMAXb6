@@ -194,6 +194,16 @@ int main(int argc, char **argv)
 #endif
         return -1;
     }
+
+    Sleep(2000);
+
+    if (iMAXbStopProcess() == -1)
+    {
+#ifdef _DEBUG
+        printf("iMAXbStopProcess error\n");
+#endif
+        return -1;
+    }
     
     if (iMAXb6Cleanup() == -1)
     {
