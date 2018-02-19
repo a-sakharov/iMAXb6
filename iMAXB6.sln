@@ -11,6 +11,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "iMAXb6", "iMAXb6\iMAXb6.vcxproj", "{BE58AA16-16A1-45F4-828B-FA02B3CF9BBA}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ChargeMasterNative", "ChargeMasterNative\ChargeMasterNative.vcxproj", "{984278B9-8D2F-42C1-9AF5-094DB246F37C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{BE58AA16-16A1-45F4-828B-FA02B3CF9BBA} = {BE58AA16-16A1-45F4-828B-FA02B3CF9BBA}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -22,7 +22,12 @@ enum QuenuedActionsList
     READ_SOMECHARGEDATA = 1 << 1,
     READ_CHARGEDATA = 1 << 2,
     STOP_PROCESS = 1 << 3,
-    START_PROCESS = 1 << 4
+    START_PROCESS = 1 << 4,
+    SET_TEMPLIMIT = 1 << 5,
+    SET_BUZZ = 1 << 6,
+    SET_CAPLIMIT = 1 << 7,
+    SET_TIMELIMIT = 1 << 8,
+    SET_CYCLETIME = 1 << 9
 };
 
 #endif

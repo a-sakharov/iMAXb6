@@ -73,33 +73,47 @@ int iMAXb6Cleanup()
     return hid_exit();
 }
 
-int iMAXb6SendPacket(uint8_t code, uint8_t *payload, uint8_t payloadLen)
+int iMAXb6SendPacket(uint8_t code, uint8_t subCode, uint8_t *payload, uint8_t payloadLen)
 {
     uint8_t i;
-    uint8_t checksum = code;
+    uint8_t checksum = code + subCode;
+    uint8_t offset;
     uint8_t packet[65] = {
         0x00, // sub-addr?
         0x0F, // ??
         0x03, // bytes count?
         code, // code
-        0x00, // ??
+        0,    // zero
         checksum, // checksum (packet[3]+packet[4])
         0xFF, // EOF?
         0xFF  // EOF?
     };
-    
+
+
     if (payload)
     {
-        packet[2] = 3 + payloadLen;
+        if (code == CMD_SEND_SETTINGS)
+        {
+            packet[4] = subCode;
+            packet[5] = 0;
+            offset = 6;
+            packet[2] = 3 + payloadLen + 1;
+        }
+        else
+        {
+            offset = 5;
+            packet[2] = 3 + payloadLen;
+        }
+
         for (i = 0; i < payloadLen; ++i)
         {
-            packet[5 + i] = payload[i];
+            packet[offset + i] = payload[i];
             checksum += payload[i];
         }
 
-        packet[5 + i] = checksum;
-        packet[5 + i + 1] = 0xFF;
-        packet[5 + i + 2] = 0xFF;
+        packet[offset + i] = checksum;
+        packet[offset + i + 1] = 0xFF;
+        packet[offset + i + 2] = 0xFF;
     }
 
     return hid_write(iMAXb6Device, packet, 65);
@@ -111,7 +125,7 @@ int iMAXb6GetChargeInfo(struct ChargeInfo *chargeState)
     uint8_t *dataPntr = buffer + 4;
     int count;
 
-    if (iMAXb6SendPacket(CMD_GET_PROCESS_DATA, NULL, 0) == -1)
+    if (iMAXb6SendPacket(CMD_GET_PROCESS_DATA, 0, NULL, 0) == -1)
     {
 #ifdef _DEBUG
         printf("iMAXb6SendPacket error\n");
@@ -176,7 +190,7 @@ int iMAXb6GetDeviceInfo(struct DeviceInfo *devInfo)
     uint8_t i;
     uint8_t sum = 0;
 
-    if (iMAXb6SendPacket(CMD_GET_DEVICE_DATA, NULL, 0) == -1)
+    if (iMAXb6SendPacket(CMD_GET_DEVICE_DATA, 0, NULL, 0) == -1)
     {
 #ifdef _DEBUG
         printf("iMAXb6SendPacket error\n");
@@ -260,7 +274,7 @@ int iMAXb6GetChargeData(struct ChargeData *chargeData)
     uint8_t *dataPntr = buffer + 4;
     int count;
 
-    if (iMAXb6SendPacket(CMD_GET_CHARGE_DATA, NULL, 0) == -1)
+    if (iMAXb6SendPacket(CMD_GET_CHARGE_DATA, 0, NULL, 0) == -1)
     {
 #ifdef _DEBUG
         printf("iMAXb6SendPacket error\n");
@@ -326,7 +340,7 @@ int iMAXb6GetSomeChargeData(struct SomeChargeData *someChargeData)
     uint8_t *dataPntr = buffer + 4;
     int count;
 
-    if (iMAXb6SendPacket(CMD_UND_CHARGE_DATA, NULL, 0) == -1)
+    if (iMAXb6SendPacket(CMD_UND_CHARGE_DATA, 0 , NULL, 0) == -1)
     {
 #ifdef _DEBUG
         printf("iMAXb6SendPacket error\n");
@@ -370,7 +384,7 @@ int iMAXb6GetSomeChargeData(struct SomeChargeData *someChargeData)
     return count;
 }
 
-int iMAXbStartProcess(struct ProcessParams *processParams)
+int iMAXb6StartProcess(struct ProcessParams *processParams)
 {
     uint8_t buffer[128];
     uint8_t *dataPntr = buffer + 4;
@@ -427,7 +441,7 @@ int iMAXbStartProcess(struct ProcessParams *processParams)
     buffer[17] = 0;
     buffer[18] = 0;
 
-    if (iMAXb6SendPacket(CMD_START_WITH_PARAMS, buffer, 19) == -1)
+    if (iMAXb6SendPacket(CMD_START_WITH_PARAMS, 0, buffer, 19) == -1)
     {
 #ifdef _DEBUG
         printf("iMAXb6SendPacket error\n");
@@ -467,13 +481,13 @@ int iMAXbStartProcess(struct ProcessParams *processParams)
     return count;
 }
 
-int iMAXbStopProcess()
+int iMAXb6StopProcess()
 {
     uint8_t buffer[128];
     uint8_t *dataPntr = buffer + 4;
     int count;
 
-    if (iMAXb6SendPacket(CMD_STOP, NULL, 0) == -1)
+    if (iMAXb6SendPacket(CMD_STOP, 0, NULL, 0) == -1)
     {
 #ifdef _DEBUG
         printf("iMAXb6SendPacket error\n");
@@ -541,4 +555,159 @@ int iMAXb6CheckSum(uint8_t bytesCount, uint8_t *data, uint8_t startFrom)
     }
 
     return 0;
+}
+
+int iMAXb6SetCycleTime(uint8_t cycleTime)
+{
+    uint8_t buffer[128];
+    int count;
+    uint8_t payload[] = { cycleTime };
+    if (iMAXb6SendPacket(CMD_SEND_SETTINGS, SET_CYCLE_TIME, payload, sizeof(payload)) == -1)
+    {
+#ifdef _DEBUG
+        printf("iMAXb6SendPacket error\n");
+#endif
+        return -1;
+    }
+
+    count = hid_read_timeout(iMAXb6Device, buffer, sizeof(buffer), 100);
+    if ((count == -1) || (count == 0))
+    {
+#ifdef _DEBUG
+        printf("hid_read_timeout error\n");
+#endif
+        return -1;
+    }
+
+    if (!iMAXb6CheckAck(buffer))
+    {
+#ifdef _DEBUG
+        printf("iMAXb6CheckAck error\n");
+#endif
+        return -1;
+    }
+}
+
+int iMAXb6SetTimelimit(uint8_t enable, uint16_t timeLimit)
+{
+    uint8_t buffer[128];
+    int count;
+    uint8_t payload[] = { enable, (timeLimit >> 8) & 0xFF, timeLimit & 0xFF };
+    if (iMAXb6SendPacket(CMD_SEND_SETTINGS, SET_TIME_LIMIT, payload, sizeof(payload)) == -1)
+    {
+#ifdef _DEBUG
+        printf("iMAXb6SendPacket error\n");
+#endif
+        return -1;
+    }
+
+    count = hid_read_timeout(iMAXb6Device, buffer, sizeof(buffer), 100);
+    if ((count == -1) || (count == 0))
+    {
+#ifdef _DEBUG
+        printf("hid_read_timeout error\n");
+#endif
+        return -1;
+    }
+
+    if (!iMAXb6CheckAck(buffer))
+    {
+#ifdef _DEBUG
+        printf("iMAXb6CheckAck error\n");
+#endif
+        return -1;
+    }
+}
+
+int iMAXb6SetCapLimit(uint8_t enable, uint16_t capLimit)
+{
+    uint8_t buffer[128];
+    int count;
+    uint8_t payload[] = { enable, (capLimit >> 8) & 0xFF, capLimit & 0xFF };
+    if (iMAXb6SendPacket(CMD_SEND_SETTINGS, SET_CAP_LIMIT, payload, sizeof(payload)) == -1)
+    {
+#ifdef _DEBUG
+        printf("iMAXb6SendPacket error\n");
+#endif
+        return -1;
+    }
+
+    count = hid_read_timeout(iMAXb6Device, buffer, sizeof(buffer), 100);
+    if ((count == -1) || (count == 0))
+    {
+#ifdef _DEBUG
+        printf("hid_read_timeout error\n");
+#endif
+        return -1;
+    }
+
+    if (!iMAXb6CheckAck(buffer))
+    {
+#ifdef _DEBUG
+        printf("iMAXb6CheckAck error\n");
+#endif
+        return -1;
+    }
+}
+
+int iMAXb6SetBuzz(uint8_t enableKeyBuzz, uint8_t enableSysBuzz)
+{
+    uint8_t buffer[128];
+    int count;
+    uint8_t payload[] = { enableKeyBuzz,  enableSysBuzz };
+    if (iMAXb6SendPacket(CMD_SEND_SETTINGS, SET_BUZZ, payload, sizeof(payload)) == -1)
+    {
+#ifdef _DEBUG
+        printf("iMAXb6SendPacket error\n");
+#endif
+        return -1;
+    }
+
+    count = hid_read_timeout(iMAXb6Device, buffer, sizeof(buffer), 100);
+    if ((count == -1) || (count == 0))
+    {
+#ifdef _DEBUG
+        printf("hid_read_timeout error\n");
+#endif
+        return -1;
+    }
+
+    if (!iMAXb6CheckAck(buffer))
+    {
+#ifdef _DEBUG
+        printf("iMAXb6CheckAck error\n");
+#endif
+        return -1;
+    }
+}
+
+int iMAXb6SetTempLimit(uint8_t tempLimit)
+{
+    uint8_t buffer[128];
+    int count;
+    uint8_t payload[] = { tempLimit };
+    if (iMAXb6SendPacket(CMD_SEND_SETTINGS, SET_TEMP_LIMIT, payload, sizeof(payload)) == -1)
+    {
+#ifdef _DEBUG
+        printf("iMAXb6SendPacket error\n");
+#endif
+        return -1;
+    }
+
+    count = hid_read_timeout(iMAXb6Device, buffer, sizeof(buffer), 100);
+    if ((count == -1) || (count == 0))
+    {
+#ifdef _DEBUG
+        printf("hid_read_timeout error\n");
+#endif
+        return -1;
+    }
+
+    if (!iMAXb6CheckAck(buffer))
+    {
+#ifdef _DEBUG
+        printf("iMAXb6CheckAck error\n");
+#endif
+        return -1;
+    }
 }

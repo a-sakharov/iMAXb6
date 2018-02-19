@@ -71,6 +71,26 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                     QuenuedActions |= START_PROCESS;
                 break;
 
+                case IDC_BUTTON_SET_TEMPLIMIT:
+                    QuenuedActions |= SET_TEMPLIMIT;
+                break;
+
+                case IDC_BUTTON_SET_BUZZ:
+                    QuenuedActions |= SET_BUZZ;
+                break;
+
+                case IDC_BUTTON_SET_CAPLIMIT:
+                    QuenuedActions |= SET_CAPLIMIT;
+                break;
+
+                case IDC_BUTTON_SET_TIMELIMIT:
+                    QuenuedActions |= SET_TIMELIMIT;
+                break;
+
+                case IDC_BUTTON_SET_CYCLETIME:
+                    QuenuedActions |= SET_CYCLETIME;
+                break;
+
                 default:
 
                 break;
@@ -230,7 +250,7 @@ void WorkerThread(void *lpThreadParameter)
         if (QuenuedActions & STOP_PROCESS)
         {
             QuenuedActions &= ~STOP_PROCESS;
-            iMAXbStopProcess();
+            iMAXb6StopProcess();
         }
 
         if (QuenuedActions & START_PROCESS)
@@ -262,7 +282,7 @@ void WorkerThread(void *lpThreadParameter)
             processParams.Cyc_count = (uint8_t)wcstoul(buffer, NULL, 10);
             GetDlgItemText(Dialog, IDC_PP_TRICKLE_EDIT, buffer, sizeof(buffer) / sizeof(*buffer));
             processParams.Trickle = (uint16_t)wcstoul(buffer, NULL, 10);
-            iMAXbStartProcess(&processParams);
+            iMAXb6StartProcess(&processParams);
         }
 
         if (iMAXb6GetChargeInfo(&ChargeInfo) != -1)
@@ -322,7 +342,43 @@ void WorkerThread(void *lpThreadParameter)
             SetDlgItemText(Dialog, IDC_CI_CELL8_MONITOR, buffer);
         }
 
-        Sleep(1000);
+        if (QuenuedActions & SET_TEMPLIMIT)
+        {
+            QuenuedActions &= ~SET_TEMPLIMIT;
+            GetDlgItemText(Dialog, IDC_SETTINGS_TEMPLIMIT_EDIT, buffer, sizeof(buffer) / sizeof(*buffer));
+            iMAXb6SetTempLimit((uint8_t)wcstoul(buffer, NULL, 10));
+
+        }
+
+        if (QuenuedActions & SET_BUZZ)
+        {
+            QuenuedActions &= ~SET_BUZZ;
+            iMAXb6SetBuzz((uint8_t)IsDlgButtonChecked(Dialog, IDC_SETTINGS_KEYBUZZ_CHECK), (uint8_t)IsDlgButtonChecked(Dialog, IDC_SETTINGS_SYSBUZZ_CHECK));
+        }
+
+        if (QuenuedActions & SET_CAPLIMIT)
+        {
+            QuenuedActions &= ~SET_CAPLIMIT;
+            GetDlgItemText(Dialog, IDC_SETTINGS_CAPLIMIT_EDIT, buffer, sizeof(buffer) / sizeof(*buffer));
+            iMAXb6SetCapLimit((uint8_t)IsDlgButtonChecked(Dialog, IDC_SETTINGS_CAPLIMITENABLE_CHECK), (uint16_t)wcstoul(buffer, NULL, 10));
+        }
+
+        if (QuenuedActions & SET_TIMELIMIT)
+        {
+            QuenuedActions &= ~SET_TIMELIMIT;
+            GetDlgItemText(Dialog, IDC_SETTINGS_TIMELIMIT_EDIT, buffer, sizeof(buffer) / sizeof(*buffer));
+            iMAXb6SetTimelimit((uint8_t)IsDlgButtonChecked(Dialog, IDC_SETTINGS_TIMELIMITENABLE_CHECK), (uint16_t)wcstoul(buffer, NULL, 10));
+
+        }
+
+        if (QuenuedActions & SET_CYCLETIME)
+        {
+            QuenuedActions &= ~SET_CYCLETIME;
+            GetDlgItemText(Dialog, IDC_SETTINGS_CYCLETIME_EDIT, buffer, sizeof(buffer) / sizeof(*buffer));
+            iMAXb6SetCycleTime((uint8_t)wcstoul(buffer, NULL, 10));
+        }
+
+        Sleep(500);
 
     }
 }

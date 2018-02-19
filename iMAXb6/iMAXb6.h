@@ -15,8 +15,13 @@ IMAXB6_FUNC int iMAXb6GetChargeInfo(struct ChargeInfo *chargeState);
 IMAXB6_FUNC int iMAXb6GetDeviceInfo(struct DeviceInfo *devInfo);
 IMAXB6_FUNC int iMAXb6GetChargeData(struct ChargeData *chargeData);
 IMAXB6_FUNC int iMAXb6GetSomeChargeData(struct SomeChargeData *someChargeData);
-IMAXB6_FUNC int iMAXbStartProcess(struct ProcessParams *processParams);
-IMAXB6_FUNC int iMAXbStopProcess();
+IMAXB6_FUNC int iMAXb6StartProcess(struct ProcessParams *processParams);
+IMAXB6_FUNC int iMAXb6StopProcess();
+IMAXB6_FUNC int iMAXb6SetCycleTime(uint8_t cycleTime);
+IMAXB6_FUNC int iMAXb6SetTimelimit(uint8_t enable, uint16_t timeLimit);
+IMAXB6_FUNC int iMAXb6SetCapLimit(uint8_t enable, uint16_t capLimit);
+IMAXB6_FUNC int iMAXb6SetBuzz(uint8_t enableKeyBuzz, uint8_t enableSysBuzz);
+IMAXB6_FUNC int iMAXb6SetTempLimit(uint8_t tempLimit);
 
 struct ChargeInfo
 {
@@ -96,4 +101,7 @@ struct ProcessParams
     uint8_t  Cyc_count;      //?
     uint16_t Trickle;        //?
 };
+
+
+
 #endif

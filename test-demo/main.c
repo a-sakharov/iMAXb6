@@ -187,7 +187,7 @@ int main(int argc, char **argv)
     pparams.Cyc_count = 1;
     pparams.Trickle = 0;
 
-    if (iMAXbStartProcess(&pparams) == -1)
+    if (iMAXb6StartProcess(&pparams) == -1)
     {
 #ifdef _DEBUG
         printf("iMAXbStartProcess error\n");
@@ -197,7 +197,7 @@ int main(int argc, char **argv)
 
     Sleep(2000);
 
-    if (iMAXbStopProcess() == -1)
+    if (iMAXb6StopProcess() == -1)
     {
 #ifdef _DEBUG
         printf("iMAXbStopProcess error\n");
