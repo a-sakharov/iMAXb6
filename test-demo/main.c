@@ -9,7 +9,7 @@ void onexitfn(void)
 int main(int argc, char **argv)
 {
     struct ChargeInfo state;
-    struct Chargedata cdata;
+    struct ChargeData cdata;
     struct DeviceInfo dinfo;
     struct SomeChargeData scinfo;
     struct ProcessParams pparams;
@@ -24,7 +24,7 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    if (iMAXb6GetState(&state) == -1)
+    if (iMAXb6GetChargeInfo(&state) == -1)
     {
 #ifdef _DEBUG
         printf("iMAXb6GetState error\n");
@@ -116,7 +116,7 @@ int main(int argc, char **argv)
 
     printf("\n\n");
 
-    if (iMAXb6GetDeviceData(&dinfo) == -1)
+    if (iMAXb6GetDeviceInfo(&dinfo) == -1)
     {
 #ifdef _DEBUG
         printf("iMAXb6GetState error\n");

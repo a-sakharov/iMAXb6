@@ -11,20 +11,20 @@
 
 IMAXB6_FUNC int iMAXb6Init();
 IMAXB6_FUNC int iMAXb6Cleanup();
-IMAXB6_FUNC int iMAXb6GetState(struct ChargeInfo *chargeState);
-IMAXB6_FUNC int iMAXb6GetDeviceData(struct DeviceInfo *devInfo);
-IMAXB6_FUNC int iMAXb6GetChargeData(struct Chargedata *chargeData);
+IMAXB6_FUNC int iMAXb6GetChargeInfo(struct ChargeInfo *chargeState);
+IMAXB6_FUNC int iMAXb6GetDeviceInfo(struct DeviceInfo *devInfo);
+IMAXB6_FUNC int iMAXb6GetChargeData(struct ChargeData *chargeData);
 IMAXB6_FUNC int iMAXb6GetSomeChargeData(struct SomeChargeData *someChargeData);
 IMAXB6_FUNC int iMAXbStartProcess(struct ProcessParams *processParams);
 IMAXB6_FUNC int iMAXbStopProcess();
 
 struct ChargeInfo
 {
-    uint8_t workState;      // some state. 1 - charging/discharging, 2 - no process, 3 - end of process caused by discharge cutoff/by charge finish, 4 - error, check main port
+    uint8_t workState;      // some state. 1 - charging/discharging, 2 - no process, 3 - end of process caused by discharge cutoff/by charge finish, 4 - error, check main port/balance connect
     uint16_t ChargeMah;     // current, mAh
     uint16_t ChargeTimer;   // seconds from start
     uint16_t OutVoltage;    // voltage on battery, mV
-    int16_t Current;        // current, mA
+    uint16_t Current;       // current, mA
     int8_t ExtTemp;         // temperature on battery, C
     int8_t IntTemp;         // temperature on charger, C
     uint16_t Intimpedance;  // battery impedance?
@@ -53,7 +53,7 @@ struct DeviceInfo
     char machine_id[33];    // ??
 };
 
-struct Chargedata
+struct ChargeData
 {
     uint8_t CycleTime;       //charge->discharge rest time, min
     uint8_t TimeLimitEnable; //bool

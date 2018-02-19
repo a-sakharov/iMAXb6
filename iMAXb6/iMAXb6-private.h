@@ -4,13 +4,14 @@
 #define IMAXB6_INNER_DLL
 
 #ifdef _DEBUG
-#define _CRT_SECURE_NO_WARNINGS
-#include <stdio.h>
 #include <ctype.h>
 #endif
 
+#define _CRT_SECURE_NO_WARNINGS
+
 #include "iMAXb6.h"
 #include <string.h>
+#include <stdio.h>
 #include <hidapi.h>
 
 
@@ -28,7 +29,9 @@
 
 
 int iMAXb6CheckSum(uint8_t bytesCount, uint8_t *data, uint8_t startFrom);
-int iMAXb6SendPacket(uint8_t code);
+int iMAXb6SendPacket(uint8_t code, uint8_t *payload, uint8_t payloadLen);
+int iMAXb6CheckAck(uint8_t *data);
 
 hid_device *iMAXb6Device;
+
 #endif

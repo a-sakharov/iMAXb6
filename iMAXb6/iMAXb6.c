@@ -105,7 +105,7 @@ int iMAXb6SendPacket(uint8_t code, uint8_t *payload, uint8_t payloadLen)
     return hid_write(iMAXb6Device, packet, 65);
 }
 
-int iMAXb6GetState(struct ChargeInfo *chargeState)
+int iMAXb6GetChargeInfo(struct ChargeInfo *chargeState)
 {
     uint8_t buffer[128];
     uint8_t *dataPntr = buffer + 4;
@@ -168,7 +168,7 @@ int iMAXb6GetState(struct ChargeInfo *chargeState)
     return count;
 }
 
-int iMAXb6GetDeviceData(struct DeviceInfo *devInfo)
+int iMAXb6GetDeviceInfo(struct DeviceInfo *devInfo)
 {
     uint8_t buffer[128];
     uint8_t *dataPntr = buffer + 5;
@@ -254,7 +254,7 @@ int iMAXb6GetDeviceData(struct DeviceInfo *devInfo)
     return count;
 }
 
-int iMAXb6GetChargeData(struct Chargedata *chargeData)
+int iMAXb6GetChargeData(struct ChargeData *chargeData)
 {
     uint8_t buffer[128];
     uint8_t *dataPntr = buffer + 4;
@@ -512,6 +512,7 @@ int iMAXbStopProcess()
 
     return count;
 }
+
 int iMAXb6CheckAck(uint8_t *data)
 {
     if ((data[0] == 0xF0) && (data[1] == 0xFF) && (data[2] == 0xFF))
