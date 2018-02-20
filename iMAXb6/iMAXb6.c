@@ -586,6 +586,8 @@ int iMAXb6SetCycleTime(uint8_t cycleTime)
 #endif
         return -1;
     }
+
+    return 0;
 }
 
 int iMAXb6SetTimelimit(uint8_t enable, uint16_t timeLimit)
@@ -617,6 +619,8 @@ int iMAXb6SetTimelimit(uint8_t enable, uint16_t timeLimit)
 #endif
         return -1;
     }
+
+    return 0;
 }
 
 int iMAXb6SetCapLimit(uint8_t enable, uint16_t capLimit)
@@ -648,6 +652,8 @@ int iMAXb6SetCapLimit(uint8_t enable, uint16_t capLimit)
 #endif
         return -1;
     }
+
+    return 0;
 }
 
 int iMAXb6SetBuzz(uint8_t enableKeyBuzz, uint8_t enableSysBuzz)
@@ -679,6 +685,8 @@ int iMAXb6SetBuzz(uint8_t enableKeyBuzz, uint8_t enableSysBuzz)
 #endif
         return -1;
     }
+
+    return 0;
 }
 
 int iMAXb6SetTempLimit(uint8_t tempLimit)
@@ -710,4 +718,6 @@ int iMAXb6SetTempLimit(uint8_t tempLimit)
 #endif
         return -1;
     }
+
+    return 0;
 }
