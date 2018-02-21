@@ -25,7 +25,7 @@
 #define CMD_GET_PROCESS_DATA  (0x55) // 85
 #define CMD_GET_DEVICE_DATA   (0x57) // 87
 #define CMD_GET_CHARGE_DATA   (0x5A) // 90
-#define CMD_UND_CHARGE_DATA   (0x5F) // 95
+#define CMD_GET_MAX_CURRENT   (0x5F) // 95
 #define CMD_UPDATE_FIRMWARE   (0x88) // 136
 #define CMD_STOP              (0xFE) // 254
 

@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <process.h>
 #include <wchar.h>
+#include <Commctrl.h>
 #include "iMAXb6.h"
 #include "resource.h"
 
@@ -12,6 +13,7 @@
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 void PrintError();
 void WorkerThread(void *lpThreadParameter);
+void SetBatterySettings(uint8_t batteryType);
 
 uint16_t QuenuedActions;
 HWND Dialog;

@@ -4,12 +4,32 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 {
     MSG msg = { 0 };
     RECT rect = { 0, 0, 300, 300 };
+    uint8_t i;
+    wchar_t *batteryTypeDropBoxStrings[] = { L"LiPo", L"LiIo", L"LiFe", L"LiHv", L"NiMh", L"NiCd", L"Pb", NULL };
+
 
     if (!(Dialog = CreateDialogParam(NULL, MAKEINTRESOURCE(MAINWINDOW), NULL, WindowProc, 0)))
     {
         PrintError();
         exit(-1);
     }
+
+    for (i = 0; batteryTypeDropBoxStrings[i]; ++i)
+    {
+        SendMessage(GetDlgItem(Dialog, IDC_COMBO_BATTERYTYPE), CB_ADDSTRING, 0, (LPARAM)batteryTypeDropBoxStrings[i]);
+    }
+
+    SendMessage(GetDlgItem(Dialog, IDC_COMBO_BATTERYTYPE), CB_SETCURSEL, 0, 0);
+    SetBatterySettings(0);
+
+    SendMessage(GetDlgItem(Dialog, IDC_SETTINGS_CELLCOUNT_SLIDER), TBM_SETRANGEMIN, 1, 1);
+    SendMessage(GetDlgItem(Dialog, IDC_SETTINGS_CELLCOUNT_SLIDER), TBM_SETRANGEMAX, 1, 6);
+
+    SendMessage(GetDlgItem(Dialog, IDC_SETTINGS_CHARGECURRENT_SLIDER), TBM_SETRANGEMIN, 1, 1);
+    SendMessage(GetDlgItem(Dialog, IDC_SETTINGS_CHARGECURRENT_SLIDER), TBM_SETRANGEMAX, 1, 60);
+
+    SendMessage(GetDlgItem(Dialog, IDC_SETTINGS_DISCHARGECURRENT_SLIDER), TBM_SETRANGEMIN, 1, 1);
+    SendMessage(GetDlgItem(Dialog, IDC_SETTINGS_DISCHARGECURRENT_SLIDER), TBM_SETRANGEMAX, 1, 20);
 
     if (iMAXb6Init() == -1)
     {
@@ -22,12 +42,16 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
         PrintError();
         exit(-1);
     }
-    
+
     ShowWindow(Dialog, SW_SHOW);
 
     while (GetMessage(&msg, NULL, 0, 0))
     {
-        IsDialogMessage(Dialog, &msg);
+        if (!IsDialogMessage(Dialog, &msg))
+        {
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+        }
     }
 
     return 0;
@@ -36,6 +60,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     LONG result = 1;
+    wchar_t buffer[16];
 
     switch (uMsg)
     {
@@ -46,48 +71,84 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         }
         break;
 
+        case WM_NOTIFY:
+        switch (wParam)
+        {            
+            case IDC_SETTINGS_CELLCOUNT_SLIDER:
+            swprintf(buffer, sizeof(buffer)/sizeof(*buffer), L"%u", SendMessage(((NMHDR *)lParam)->hwndFrom, TBM_GETPOS, 0, 0));
+            SetDlgItemText(Dialog, IDC_SETTINGS_CELLCOUNT_MONITOR, buffer);
+            SetDlgItemText(Dialog, IDC_PP_CELL_EDIT, buffer);
+            break;
+
+            case IDC_SETTINGS_CHARGECURRENT_SLIDER:
+            swprintf(buffer, sizeof(buffer) / sizeof(*buffer), L"%.1fA", (double)SendMessage(((NMHDR *)lParam)->hwndFrom, TBM_GETPOS, 0, 0) / 10.0f);
+            SetDlgItemText(Dialog, IDC_SETTINGS_CHARGECURRENT_MONITOR, buffer);
+            swprintf(buffer, sizeof(buffer) / sizeof(*buffer), L"%u", SendMessage(((NMHDR *)lParam)->hwndFrom, TBM_GETPOS, 0, 0) *100);
+            SetDlgItemText(Dialog, IDC_PP_CCCURRENT_EDIT, buffer);
+            break;
+
+            case IDC_SETTINGS_DISCHARGECURRENT_SLIDER:
+            swprintf(buffer, sizeof(buffer) / sizeof(*buffer), L"%.1fA", (double)SendMessage(((NMHDR *)lParam)->hwndFrom, TBM_GETPOS, 0, 0) / 10.0f);
+            SetDlgItemText(Dialog, IDC_SETTINGS_DISCHARGECURRENT_MONITOR, buffer);
+            swprintf(buffer, sizeof(buffer) / sizeof(*buffer), L"%u", SendMessage(((NMHDR *)lParam)->hwndFrom, TBM_GETPOS, 0, 0) * 100);
+            SetDlgItemText(Dialog, IDC_PP_DCCURRENT_EDIT, buffer);
+            break;
+
+            default:
+
+            break;
+        }
+        break;
+
         case WM_COMMAND:
         {
-            switch (wParam)
+            switch (LOWORD(wParam))
             {
                 case IDC_BUTTON_READ_DEVICEINFO:
-                    QuenuedActions |= READ_DEVICEINFO;
+                QuenuedActions |= READ_DEVICEINFO;
                 break;
 
-                case IDC_BUTTON_READ_SOMECHARGEDATA:
-                    QuenuedActions |= READ_SOMECHARGEDATA;
+                case IDC_BUTTON_READ_MAXIMUMCURRENT:
+                QuenuedActions |= READ_SOMECHARGEDATA;
                 break;
 
                 case IDC_BUTTON_READ_CHARGEDATA:
-                    QuenuedActions |= READ_CHARGEDATA;
+                QuenuedActions |= READ_CHARGEDATA;
                 break;
 
                 case IDC_BUTTON_STOP_PROCESS:
-                    QuenuedActions |= STOP_PROCESS;
+                QuenuedActions |= STOP_PROCESS;
                 break;
 
                 case IDC_BUTTON_START_PROCESS:
-                    QuenuedActions |= START_PROCESS;
+                QuenuedActions |= START_PROCESS;
                 break;
 
                 case IDC_BUTTON_SET_TEMPLIMIT:
-                    QuenuedActions |= SET_TEMPLIMIT;
+                QuenuedActions |= SET_TEMPLIMIT;
                 break;
 
                 case IDC_BUTTON_SET_BUZZ:
-                    QuenuedActions |= SET_BUZZ;
+                QuenuedActions |= SET_BUZZ;
                 break;
 
                 case IDC_BUTTON_SET_CAPLIMIT:
-                    QuenuedActions |= SET_CAPLIMIT;
+                QuenuedActions |= SET_CAPLIMIT;
                 break;
 
                 case IDC_BUTTON_SET_TIMELIMIT:
-                    QuenuedActions |= SET_TIMELIMIT;
+                QuenuedActions |= SET_TIMELIMIT;
                 break;
 
                 case IDC_BUTTON_SET_CYCLETIME:
-                    QuenuedActions |= SET_CYCLETIME;
+                QuenuedActions |= SET_CYCLETIME;
+                break;
+
+                case IDC_COMBO_BATTERYTYPE:
+                if (HIWORD(wParam) == CBN_SELCHANGE)
+                {
+                    SetBatterySettings((uint8_t)SendMessage((HWND)lParam, CB_GETCURSEL, 0, 0));
+                }
                 break;
 
                 default:
@@ -95,6 +156,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                 break;
             }
         }
+        break;
 
         default:
         {
@@ -102,8 +164,69 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         }
         break;
     }
-    
+
+
     return result;
+}
+
+void SetBatterySettings(uint8_t batteryType)
+{
+    wchar_t type[8];
+    swprintf(type, sizeof(type) / sizeof(*type), L"%u", batteryType);
+    SetDlgItemText(Dialog, IDC_PP_BATTTYPE_EDIT, type);
+
+    SetDlgItemText(Dialog, IDC_PP_LIPWMMODE_EDIT, L"0");
+    SetDlgItemText(Dialog, IDC_PP_NIPWMMODE_EDIT, L"0");
+    SetDlgItemText(Dialog, IDC_PP_PBPWMMODE_EDIT, L"0");
+    SetDlgItemText(Dialog, IDC_PP_R_PEAKCOUNT_EDIT, L"1");
+    SetDlgItemText(Dialog, IDC_PP_CYCLETYPE_EDIT, L"1");
+    SetDlgItemText(Dialog, IDC_PP_CYC_COUNT_EDIT, L"1");
+    SetDlgItemText(Dialog, IDC_PP_TRICKLE_EDIT, L"0");
+
+    switch (batteryType)
+    {
+        case BATTERY_LIPO:
+        SetDlgItemText(Dialog, IDC_PP_CELLVOLTAGE_EDIT, L"3200");
+        SetDlgItemText(Dialog, IDC_PP_ENDVOLTAGE_EDIT, L"4200");
+        SendMessage(GetDlgItem(Dialog, IDC_SETTINGS_CELLCOUNT_SLIDER), TBM_SETRANGEMAX, 1, 6);
+        break;
+
+        case BATTERY_LIIO:
+        SetDlgItemText(Dialog, IDC_PP_CELLVOLTAGE_EDIT, L"3100");
+        SetDlgItemText(Dialog, IDC_PP_ENDVOLTAGE_EDIT, L"4100");
+        SendMessage(GetDlgItem(Dialog, IDC_SETTINGS_CELLCOUNT_SLIDER), TBM_SETRANGEMAX, 1, 6);
+        break;
+
+        case BATTERY_LIFE:
+        SetDlgItemText(Dialog, IDC_PP_CELLVOLTAGE_EDIT, L"2800");
+        SetDlgItemText(Dialog, IDC_PP_ENDVOLTAGE_EDIT, L"3600");
+        SendMessage(GetDlgItem(Dialog, IDC_SETTINGS_CELLCOUNT_SLIDER), TBM_SETRANGEMAX, 1, 6);
+        break;
+
+        case BATTERY_LIHV:
+        SetDlgItemText(Dialog, IDC_PP_CELLVOLTAGE_EDIT, L"3000");
+        SetDlgItemText(Dialog, IDC_PP_ENDVOLTAGE_EDIT, L"4350");
+        SendMessage(GetDlgItem(Dialog, IDC_SETTINGS_CELLCOUNT_SLIDER), TBM_SETRANGEMAX, 1, 6);
+        break;
+
+        case BATTERY_NIMH:
+        case BATTERY_NICD: //yes, same category
+        SetDlgItemText(Dialog, IDC_PP_CELLVOLTAGE_EDIT, L"900");
+        SetDlgItemText(Dialog, IDC_PP_ENDVOLTAGE_EDIT, L"4");
+        SendMessage(GetDlgItem(Dialog, IDC_SETTINGS_CELLCOUNT_SLIDER), TBM_SETRANGEMAX, 1, 6);
+        break;
+
+        case BATTERY_PB:
+        SetDlgItemText(Dialog, IDC_PP_CELLVOLTAGE_EDIT, L"1800");
+        SetDlgItemText(Dialog, IDC_PP_ENDVOLTAGE_EDIT, L"0");
+        SendMessage(GetDlgItem(Dialog, IDC_SETTINGS_CELLCOUNT_SLIDER), TBM_SETRANGEMAX, 1, 6);
+        break;
+
+        default:
+
+        break;
+    }
+
 }
 
 void WorkerThread(void *lpThreadParameter)
@@ -111,7 +234,7 @@ void WorkerThread(void *lpThreadParameter)
     struct ChargeInfo ChargeInfo;
     struct DeviceInfo DeviceInfo;
     struct ChargeData ChargeData;
-    struct SomeChargeData SomeChargeData;
+    struct MaximumCurrent SomeChargeData;
     struct ProcessParams processParams;
     wchar_t buffer[1024];
 
@@ -166,22 +289,19 @@ void WorkerThread(void *lpThreadParameter)
         if (QuenuedActions & READ_SOMECHARGEDATA)
         {
             QuenuedActions &= ~READ_SOMECHARGEDATA;
-            if (iMAXb6GetSomeChargeData(&SomeChargeData) != -1)
+            if (iMAXb6GetMaxCurrent(&SomeChargeData) != -1)
             {
-                swprintf(buffer, sizeof(buffer) / sizeof(*buffer), L"%g", SomeChargeData.a);
-                SetDlgItemText(Dialog, IDC_SCD_A_MONITOR, buffer);
-                swprintf(buffer, sizeof(buffer) / sizeof(*buffer), L"%g", SomeChargeData.b);
-                SetDlgItemText(Dialog, IDC_SCD_B_MONITOR, buffer);
-                swprintf(buffer, sizeof(buffer) / sizeof(*buffer), L"%hhu", SomeChargeData.c);
-                SetDlgItemText(Dialog, IDC_SCD_C_MONITOR, buffer);
+                swprintf(buffer, sizeof(buffer) / sizeof(*buffer), L"%hhu", SomeChargeData.maxChargeCurrent);
+                SetDlgItemText(Dialog, IDC_MC_MAXCHARGECURRENT_MONITOR, buffer);
+                swprintf(buffer, sizeof(buffer) / sizeof(*buffer), L"%hhu", SomeChargeData.maxDischargeCurrent);
+                SetDlgItemText(Dialog, IDC_MC_MAXDISCHARGECURRENT_MONITOR, buffer);
 
             }
             else
             {
                 swprintf(buffer, sizeof(buffer) / sizeof(*buffer), L"-");
-                SetDlgItemText(Dialog, IDC_SCD_A_MONITOR, buffer);
-                SetDlgItemText(Dialog, IDC_SCD_B_MONITOR, buffer);
-                SetDlgItemText(Dialog, IDC_SCD_C_MONITOR, buffer);
+                SetDlgItemText(Dialog, IDC_MC_MAXCHARGECURRENT_MONITOR, buffer);
+                SetDlgItemText(Dialog, IDC_MC_MAXDISCHARGECURRENT_MONITOR, buffer);
             }
         }
 

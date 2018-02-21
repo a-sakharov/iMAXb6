@@ -334,13 +334,13 @@ int iMAXb6GetChargeData(struct ChargeData *chargeData)
     return count;
 }
 
-int iMAXb6GetSomeChargeData(struct SomeChargeData *someChargeData)
+int iMAXb6GetMaxCurrent(struct MaximumCurrent *maximumCurrent)
 {
     uint8_t buffer[128];
     uint8_t *dataPntr = buffer + 4;
     int count;
 
-    if (iMAXb6SendPacket(CMD_UND_CHARGE_DATA, 0 , NULL, 0) == -1)
+    if (iMAXb6SendPacket(CMD_GET_MAX_CURRENT, 0 , NULL, 0) == -1)
     {
 #ifdef _DEBUG
         printf("iMAXb6SendPacket error\n");
@@ -377,9 +377,8 @@ int iMAXb6GetSomeChargeData(struct SomeChargeData *someChargeData)
         return -1;
     }
 
-    someChargeData->a = (float)dataPntr[4];
-    someChargeData->b = (float)dataPntr[5];
-    someChargeData->c = (uint8_t)dataPntr[0];
+    maximumCurrent->maxChargeCurrent = dataPntr[4]/10;
+    maximumCurrent->maxDischargeCurrent = dataPntr[5]/10;
 
     return count;
 }

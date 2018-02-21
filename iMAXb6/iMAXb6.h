@@ -14,7 +14,7 @@ IMAXB6_FUNC int iMAXb6Cleanup();
 IMAXB6_FUNC int iMAXb6GetChargeInfo(struct ChargeInfo *chargeState);
 IMAXB6_FUNC int iMAXb6GetDeviceInfo(struct DeviceInfo *devInfo);
 IMAXB6_FUNC int iMAXb6GetChargeData(struct ChargeData *chargeData);
-IMAXB6_FUNC int iMAXb6GetSomeChargeData(struct SomeChargeData *someChargeData);
+IMAXB6_FUNC int iMAXb6GetMaxCurrent(struct MaximumCurrent *someChargeData);
 IMAXB6_FUNC int iMAXb6StartProcess(struct ProcessParams *processParams);
 IMAXB6_FUNC int iMAXb6StopProcess();
 IMAXB6_FUNC int iMAXb6SetCycleTime(uint8_t cycleTime);
@@ -22,6 +22,17 @@ IMAXB6_FUNC int iMAXb6SetTimelimit(uint8_t enable, uint16_t timeLimit);
 IMAXB6_FUNC int iMAXb6SetCapLimit(uint8_t enable, uint16_t capLimit);
 IMAXB6_FUNC int iMAXb6SetBuzz(uint8_t enableKeyBuzz, uint8_t enableSysBuzz);
 IMAXB6_FUNC int iMAXb6SetTempLimit(uint8_t tempLimit);
+
+enum BatteryType
+{
+    BATTERY_LIPO = 0,
+    BATTERY_LIIO = 1,
+    BATTERY_LIFE = 2,
+    BATTERY_LIHV = 3,
+    BATTERY_NIMH = 4,
+    BATTERY_NICD = 5,
+    BATTERY_PB = 6
+};
 
 struct ChargeInfo
 {
@@ -78,11 +89,10 @@ struct ChargeData
     uint16_t CELL6;          //?
 };
 
-struct SomeChargeData
+struct MaximumCurrent
 {
-    float a;
-    float b;
-    uint8_t c;
+    uint8_t maxChargeCurrent;//in A
+    uint8_t maxDischargeCurrent;//in A
 };
 
 struct ProcessParams

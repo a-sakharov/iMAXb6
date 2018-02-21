@@ -11,7 +11,7 @@ int main(int argc, char **argv)
     struct ChargeInfo state;
     struct ChargeData cdata;
     struct DeviceInfo dinfo;
-    struct SomeChargeData scinfo;
+    struct MaximumCurrent scinfo;
     struct ProcessParams pparams;
 
     atexit(onexitfn);
@@ -152,7 +152,7 @@ int main(int argc, char **argv)
 
     printf("\n\n");
 
-    if (iMAXb6GetSomeChargeData(&scinfo) == -1)
+    if (iMAXb6GetMaxCurrent(&scinfo) == -1)
     {
 #ifdef _DEBUG
         printf("iMAXb6GetChargeData error\n");
@@ -161,13 +161,11 @@ int main(int argc, char **argv)
     }
         
     printf(
-        "a        " "%g"   " ?"   "\n"
-        "b        " "%g"   " ?"   "\n"
-        "c        " "%hhu" " ?"   "\n"
+        "a        " "%hhu"   " ?"   "\n"
+        "b        " "%hhu"   " ?"   "\n"
         ,
-        scinfo.a,
-        scinfo.b,
-        scinfo.c
+        scinfo.maxChargeCurrent,
+        scinfo.maxDischargeCurrent
     );
 
 
